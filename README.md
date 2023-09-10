@@ -1,46 +1,126 @@
-# Getting Started with Create React App
+# **Search Clone Application**
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+이 프로젝트는 검색 기능을 클론하여 구현한 애플리케이션입니다. 특히, 입력에 따른 API 호출, 로컬 캐싱, 키보드를 사용한 검색어 탐색 등의 기능이 포함되어 있습니다.
 
-## Available Scripts
+## **데모**
 
-In the project directory, you can run:
+**[Live Demo](https://search-clone-mrsimplelife.vercel.app/)**
 
-### `yarn start`
+## **주요 기능**
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. **API 호출과 로컬 캐싱**:
+사용자의 검색 쿼리가 변경될 때마다 API를 호출하지 않고, 캐시에 저장된 데이터를 먼저 확인합니다. 캐시에 데이터가 없을 경우에만 API 호출을 수행합니다.
+2. **API 호출 횟수 최소화**:
+사용자의 입력마다 즉시 API를 호출하지 않고, 일정한 딜레이 후에 API 호출을 수행합니다. 이는 불필요한 API 호출을 줄이기 위한 전략입니다.
+3. **키보드 탐색**:
+화살표 키와 Enter 키를 사용하여 추천 검색어 목록 내의 항목을 탐색하고 선택할 수 있습니다.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## **사용된 주요 기술**
 
-### `yarn test`
+- React
+- Context API
+- useRef, useCallback, useEffect, useState 등의 React Hooks
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## **설치 및 실행**
 
-### `yarn build`
+```bash
+# 레포지토리를 클론합니다.
+git clone https://github.com/mrsimplelife/search-clone.git
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# 디렉토리로 이동합니다.
+cd search-clone
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+# 의존성을 설치합니다.
+yarn
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# 개발 서버를 실행합니다.
+yarn start
 
-### `yarn eject`
+# json-server를 실행합니다.
+yarn server
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+# 과제소개
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 목표
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- 검색창 구현 + 검색어 추천 기능 구현 + 캐싱 기능 구현
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## 구현 목표
 
-## Learn More
+- 아래 사이트의 검색영역을 클론하기
+    
+    [한국임상정보](https://clinicaltrialskorea.com/)
+    
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- ## 질환명 검색시 API 호출 통해서 검색어 추천 기능 구현
+    - 검색어가 없을 시 “검색어 없음” 표출
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- ## API 호출별로 로컬 캐싱 구현
+    - 캐싱 기능을 제공하는 라이브러리 사용 금지(React-Query 등)
+    
+    핵심 부분은 React의 Hook과 Context API를 이용하여 만들어진 로컬 캐싱 시스템입니다.
+    
+    **1. Cache 클래스**
+    
+    - **`Cache`** 클래스는 문자열 키와 일반적인 값을 가진 간단한 캐싱 시스템을 구현합니다.
+    - 내부적으로는 JavaScript의 **`Map`** 을 사용하여 캐싱을 처리합니다.
+    
+    **2. CacheContext**
+    
+    - **`CacheContext`** 는 애플리케이션의 다른 부분에서 캐시에 접근할 수 있도록 해주는 React Context입니다.
+    - **`Provider`** 컴포넌트는 **`Cache`** 인스턴스를 자식 컴포넌트들에게 제공합니다.
+    - **`useCache`** 훅을 통해 해당 Context를 사용할 수 있습니다.
+    
+    **3. useQuery 훅**
+    
+    - **`useQuery`** 는 외부 API 호출을 수행하고, 결과를 로컬 캐시에 저장하거나, 이미 저장된 값을 로컬 캐시에서 가져오는 역할을 합니다.
+    - 호출은 **`queryFn`** 을 통해 이루어지며, **`queryKey`** 는 해당 호출의 고유한 키 역할을 합니다.
+    - 만약 캐시에 해당 **`queryKey`** 에 대한 데이터가 이미 있으면, 해당 데이터를 반환합니다. 없다면 API를 호출하고 그 결과를 캐시에 저장합니다.
+    - 이 훅은 데이터, 로딩 상태, 오류 상태를 반환합니다.
+    
+    **동작 과정:**
+    
+    1. **`App`** 컴포넌트에서 **`Cache`** 인스턴스를 생성하고, **`Provider`** 를 통해 이를 애플리케이션의 다른 부분에 제공합니다.
+    2. **`useQuery`** 훅에서는 **`useCache`** 훅을 통해 이 캐시에 접근합니다.
+    3. 사용자가 특정 API 호출을 요청하면, 먼저 해당 호출에 대한 키를 생성합니다.
+    4. 이 키를 사용하여 로컬 캐시에 데이터가 이미 있는지 확인합니다.
+    5. 데이터가 있으면 캐시에서 가져와 반환하고, 없으면 API 호출을 수행한 후 그 결과를 캐시에 저장하고 반환합니다.
+    
+- ## 입력마다 API 호출하지 않도록 API 호출 횟수를 줄이는 전략 수립 및 실행
+    
+    사용자의 입력마다 즉시 API를 호출하는 대신 "debounce" 전략을 사용하여 불필요한 API 호출을 줄이는 방법을 구현.
+    
+    "debounce"란 연속된 이벤트가 발생할 때 이벤트 처리 함수를 즉시 실행하는 대신 일정 시간 동안 기다렸다가 마지막 이벤트가 발생한 후 일정 시간이 지나면 실행하는 방법입니다. 이 방법을 사용하면 사용자가 키보드 입력을 빠르게 연속해서 하는 경우에 API 호출을 여러 번 하는 것을 방지하고, 사용자의 입력이 안정될 때만 한 번 API 호출을 수행합니다.
+    
+    **코드에서의 "debounce" 처리 방법:**
+    
+    1. **`timer`** 라는 **`useRef`** 를 사용하여 현재의 timeout을 추적합니다.
+    2. **`updateData`** 함수에서는 먼저 이전의 timeout을 **`clearTimeout`** 을 사용하여 제거합니다.
+    3. 만약 캐시에 해당 데이터가 이미 있다면, 캐시에서 데이터를 가져와서 바로 설정합니다. 이 경우에는 API 호출이 필요 없습니다.
+    4. 캐시에 데이터가 없을 경우, **`setTimeout`** 을 사용하여 **`debounceDelay`** 만큼의 시간이 지난 후에 API 호출을 수행합니다. 이 시간 동안에 다른 입력이나 이벤트가 발생하면, 위의 과정이 반복되어 이전의 timeout은 제거되고 새로운 timeout이 설정됩니다. 따라서 연속된 입력이 있을 때는 실제 API 호출은 이루어지지 않습니다.
+    5. **`debounceDelay`** 가 지난 후에 실제 API 호출이 이루어집니다.
+    
+    이런 방식으로 코드는 연속된 이벤트나 입력 사이에 일정 시간 동안의 공백이 있을 때만 API를 호출하게 됩니다. 이를 통해 불필요한 API 호출을 크게 줄일 수 있습니다.
+    
+- ## API를 호출할 때 마다 `console.info("calling api")` 출력을 통해 콘솔창에서 API 호출 횟수 확인이 가능하도록 설정
+
+- ## 키보드만으로 추천 검색어들로 이동 가능하도록 구현
+
+    **`useSearch`** 훅은 검색 인터페이스에 관한 로직을 처리합니다. 이 중에서 키보드로 추천 검색어들을 탐색하고 선택하는 기능을 구현한 부분에 대해 설명하겠습니다.
+    
+    1. **상태 및 참조 변수 설정**:
+        - **`index`**: 현재 선택된 추천 검색어의 인덱스입니다. 초기값은 **`1`** 로 설정되어 있으며, 이는 아무런 항목도 선택되지 않았음을 의미합니다.
+        - **`inputRef`**: 검색 입력 요소에 대한 참조입니다.
+        - **`popupRef`**: 추천 검색어 목록을 포함하는 팝업 요소에 대한 참조입니다.
+    2. **키보드 이벤트 처리**:
+        - **`keyEvent`** 객체는 키보드의 키 이름을 기반으로 각 키에 대한 처리 함수를 매핑합니다.
+        - **`Enter`**: 현재 선택된 항목이 있으면 해당 항목의 검색어를 입력 창에 채웁니다. 선택된 항목이 없으면 현재 입력된 값을 사용하여 검색을 수행합니다.
+        - **`ArrowDown`**: 추천 검색어 목록에서 다음 항목을 선택합니다. 마지막 항목에서 이 키를 누르면 처음 항목으로 돌아갑니다.
+        - **`ArrowUp`**: 추천 검색어 목록에서 이전 항목을 선택합니다. 첫 번째 항목에서 이 키를 누르면 마지막 항목으로 돌아갑니다.
+    3. **목록 내 항목 선택 시 스크롤 조정**:
+        - **`handleChangeIndex`** 함수는 현재 선택된 인덱스에 따라 해당 항목을 팝업 내에서 보이도록 스크롤합니다.
+    4. **추천 검색어 클릭 처리**:
+        - **`handleClickItem`** 함수는 사용자가 특정 추천 검색어를 마우스로 클릭했을 때 호출됩니다. 해당 항목의 검색어를 입력 창에 설정하고, 입력 창에 포커스를 부여합니다.
+    
+    이와 같이 제공된 코드는 키보드의 화살표 키와 Enter 키를 사용하여 추천 검색어 목록 내의 항목을 탐색하고 선택하는 기능을 구현. 사용자는 화살표 키를 사용하여 추천 항목을 위/아래로 탐색할 수 있으며, Enter 키를 사용하여 현재 선택된 항목의 검색어를 입력 창에 적용할 수 있습니다.
