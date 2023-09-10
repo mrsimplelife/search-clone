@@ -1,0 +1,15 @@
+.listItem {
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.listItem:hover,
+.selected {
+  background-color: #f2f2f2;
+}
+
+.selected {
+  font-weight: bold;
+  color: #0056b3;
+}
