@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCache } from '../contexts/cacheContext';
 
 type Options<T> = {
@@ -19,8 +19,7 @@ function useQuery<T>(queryKey: any[], queryFn: () => Promise<T>, options: Option
   };
   useEffect(updateFn, [queryFn]);
 
-  const updateData = useCallback(() => {
-    clearTimeout(timer.current);
+  useEffect(() => {
     if (!enabled) return;
     if (cache.has(key)) {
       setData(cache.get(key)!);
@@ -40,9 +39,11 @@ function useQuery<T>(queryKey: any[], queryFn: () => Promise<T>, options: Option
           setLoading(false);
         });
     }, debounceDelay);
-  }, [cache, enabled, key, debounceDelay]);
 
-  useEffect(updateData, [updateData]);
+    return () => {
+      clearTimeout(timer.current);
+    };
+  }, [cache, debounceDelay, enabled, key]);
 
   const [data, setData] = useState<T>(initialData);
   const [loading, setLoading] = useState(false);
