@@ -8,6 +8,7 @@ export function createRecentItem(name: string): Recent[] {
     return newRecentItems;
   }
   const parsedRecentItems: Recent[] = JSON.parse(recentItems);
+  if (!name) return parsedRecentItems;
   const index = parsedRecentItems.findIndex((item) => item.name === name);
   if (index !== -1) {
     const newRecentItems = [{ id: parsedRecentItems[index].id, name }, ...parsedRecentItems.slice(0, index), ...parsedRecentItems.slice(index + 1)];

@@ -1,26 +1,21 @@
-import { FormEvent, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Recent } from '../types';
 import { createRecentItem, deleteRecentItem, readRecentItem } from '../utils/localStorageUtils';
 
-function useRecentItems(inputRef: React.RefObject<HTMLInputElement>) {
+function useRecentItems() {
   const [recentItems, setRecentItems] = useState<Recent[]>(readRecentItem());
 
-  const handleDeleteRecentItem = useCallback(
-    (id: number) => {
-      const recentItems = deleteRecentItem(id);
-      setRecentItems(recentItems);
-      inputRef.current?.focus();
-    },
-    [inputRef]
-  );
+  const handleDeleteRecentItem = useCallback((id: number) => {
+    const recentItems = deleteRecentItem(id);
+    setRecentItems(recentItems);
+  }, []);
 
-  const handleSubmit = useCallback((e: FormEvent<HTMLFormElement>, input: string) => {
-    e.preventDefault();
+  const handleCreateRecentItem = useCallback((input: string) => {
     const recentItems = createRecentItem(input);
     setRecentItems(recentItems);
   }, []);
 
-  return { recentItems, handleDeleteRecentItem, handleSubmit };
+  return { recentItems, handleDeleteRecentItem, handleCreateRecentItem };
 }
 
 export default useRecentItems;

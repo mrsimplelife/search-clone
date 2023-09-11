@@ -14,10 +14,9 @@ function useQuery<T>(queryKey: any[], queryFn: () => Promise<T>, options: Option
   const fn = useRef(queryFn);
   const timer = useRef<NodeJS.Timeout>();
 
-  const updateFn = () => {
+  useEffect(() => {
     fn.current = queryFn;
-  };
-  useEffect(updateFn, [queryFn]);
+  }, [queryFn]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -40,9 +39,7 @@ function useQuery<T>(queryKey: any[], queryFn: () => Promise<T>, options: Option
         });
     }, debounceDelay);
 
-    return () => {
-      clearTimeout(timer.current);
-    };
+    return () => clearTimeout(timer.current);
   }, [cache, debounceDelay, enabled, key]);
 
   const [data, setData] = useState<T>(initialData);

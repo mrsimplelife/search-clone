@@ -1,18 +1,23 @@
 import { useCallback } from 'react';
 
-function useScroll(popupRef: React.RefObject<HTMLDivElement>) {
+type Option = {
+  popupRef: React.RefObject<HTMLElement>;
+  selectors: string;
+};
+
+function useScroll({ popupRef, selectors }: Option) {
   const handleScroll = useCallback(
     (index: number) => {
       if (!popupRef.current) return;
-      const scrollItems = popupRef.current.querySelectorAll(':scope > ul > li');
+      const scrollItems = popupRef.current.querySelectorAll(selectors);
       const currentItem = scrollItems[index];
       if (currentItem) {
         currentItem.scrollIntoView({ block: 'nearest' });
       }
     },
-    [popupRef]
+    [popupRef, selectors]
   );
-  return { handleScroll };
+  return handleScroll;
 }
 
 export default useScroll;

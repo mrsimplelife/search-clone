@@ -7,43 +7,43 @@ function Search() {
   const {
     input,
     index,
-    show,
     items,
     loading,
-    handleChangeInput,
-    handleFocusInput,
-    handleKeyDownInput,
-    handleClickItem,
     inputRef,
     popupRef,
     recentItems,
-    handleDeleteRecentItem,
+    isShowPopup,
+    handleChangeInput,
+    handleClickItem,
+    handleClickDelete,
     handleClickRecentItem,
     handleSubmit,
+    handleKeyDown,
+    showPopup,
   } = useSearch();
 
   return (
     <div className={styles.searchContainer}>
       <div className={styles.relativeContainer}>
-        <form onSubmit={(e) => handleSubmit(e, input)}>
+        <form onSubmit={handleSubmit}>
           <input
             className={styles.searchInput}
             ref={inputRef}
             type="search"
             value={input}
             onChange={handleChangeInput}
-            onFocus={handleFocusInput}
-            onKeyDown={(e) => handleKeyDownInput(e, index, items)}
+            onKeyDown={handleKeyDown}
+            onFocus={showPopup}
           />
         </form>
 
-        {show && (
+        {isShowPopup && (
           <div className={styles.popup} ref={popupRef}>
             <div>
               최근 검색어
               <ul>
                 {recentItems.map(({ id, name }) => (
-                  <RecommendItem key={id} id={id} name={name} onClick={handleClickRecentItem} onDelete={handleDeleteRecentItem} />
+                  <RecommendItem key={id} id={id} name={name} onClick={handleClickRecentItem} onDelete={handleClickDelete} />
                 ))}
               </ul>
             </div>

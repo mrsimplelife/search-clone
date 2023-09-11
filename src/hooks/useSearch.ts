@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useCallback, useRef, useState } from 'react';
 import { getKeywords } from '../services/api';
 import useKeywords from './useKeywords';
 import usePopup from './usePopup';
@@ -10,8 +10,15 @@ function useSearch() {
   const [input, setInput] = useState('');
   const [triggerInput, setTriggerInput] = useState('');
   const [index, setIndex] = useState(-1);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
+
+  const { data: items, loading } = useQuery(['sick', triggerInput], () => getKeywords(triggerInput), {
+    initialData: [],
+    enabled: !!triggerInput,
+    debounceDelay: 300,
+  });
 
   const getRecommendKeywords = useCallback((name: string) => {
     setInput(name);
@@ -20,31 +27,61 @@ function useSearch() {
     inputRef.current?.focus();
   }, []);
 
-  const handleChangeInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => getRecommendKeywords(e.target.value), [getRecommendKeywords]);
+  const handleChangeInput = useCallback((e: ChangeEvent<HTMLInputElement>) => getRecommendKeywords(e.target.value), [getRecommendKeywords]);
   const handleClickRecentItem = useCallback((name: string) => getRecommendKeywords(name), [getRecommendKeywords]);
   const handleClickItem = useCallback((sickNm: string) => getRecommendKeywords(sickNm), [getRecommendKeywords]);
 
-  const { handleScroll } = useScroll(popupRef);
+  const { recentItems, handleDeleteRecentItem, handleCreateRecentItem } = useRecentItems();
 
-  const setOnlyInput = useCallback(
-    (index: number, name: string) => {
-      setIndex(index);
+  const handleSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      handleCreateRecentItem(input);
+    },
+    [input, handleCreateRecentItem]
+  );
+
+  const handleClickDelete = useCallback(
+    (id: number) => {
+      handleDeleteRecentItem(id);
+      inputRef.current?.focus();
+    },
+    [handleDeleteRecentItem]
+  );
+
+  const { isShowPopup, showPopup } = usePopup([inputRef, popupRef]);
+
+  const handleScroll = useScroll({ popupRef, selectors: ':scope > ul > li' });
+
+  const changeIndex = useCallback(
+    (name: string, index: number) => {
       setInput(name);
+      setIndex(index);
       handleScroll(index);
     },
     [handleScroll]
   );
 
-  const { handleKeyDownInput } = useKeywords(getRecommendKeywords, setOnlyInput);
-
-  const { recentItems, handleDeleteRecentItem, handleSubmit } = useRecentItems(inputRef);
-
-  const { show, handleFocusInput } = usePopup(inputRef, popupRef);
-
-  const { data: items, loading } = useQuery(['sick', triggerInput], () => getKeywords(triggerInput), {
-    initialData: [],
-    enabled: !!triggerInput,
-    debounceDelay: 300,
+  const handleKeyDown = useKeywords({
+    Enter: (e) => {
+      if (index === -1) return;
+      e.preventDefault();
+      getRecommendKeywords(items[index].sickNm);
+    },
+    ArrowDown: (e) => {
+      if (e.nativeEvent.isComposing) return;
+      e.preventDefault();
+      if (items.length === 0) return;
+      const newIndex = index >= items.length - 1 ? 0 : index + 1;
+      changeIndex(items[newIndex].sickNm, newIndex);
+    },
+    ArrowUp: (e) => {
+      if (e.nativeEvent.isComposing) return;
+      e.preventDefault();
+      if (items.length === 0) return;
+      const newIndex = index <= 0 ? items.length - 1 : index - 1;
+      changeIndex(items[newIndex].sickNm, newIndex);
+    },
   });
 
   return {
@@ -52,17 +89,17 @@ function useSearch() {
     index,
     items,
     loading,
-    handleChangeInput,
-    handleKeyDownInput,
-    handleClickItem,
     inputRef,
     popupRef,
     recentItems,
-    handleDeleteRecentItem,
+    isShowPopup,
+    handleChangeInput,
+    handleClickItem,
     handleClickRecentItem,
     handleSubmit,
-    show,
-    handleFocusInput,
+    handleClickDelete,
+    handleKeyDown,
+    showPopup,
   };
 }
 
