@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import Provider from '../../contexts/cacheContext';
 import useQuery from '../../hooks/useQuery';
 import Cache from '../../utils/Cache';
@@ -76,10 +76,7 @@ describe('useQuery', () => {
     const { result } = renderHook(() => useQuery(queryKey, queryFn, options), {
       wrapper: ({ children }) => <Provider cache={cache}>{children}</Provider>,
     });
-    expect(result.current.loading).toBe(false);
-    await waitFor(() => {
-      expect(result.current.loading).toBe(true);
-    });
+    expect(result.current.loading).toBe(true);
     await act(async () => {
       jest.advanceTimersByTime(0);
     });

@@ -48,13 +48,15 @@ function Search() {
               </ul>
             </div>
             <ul>
-              {!!input &&
+              {items.length === 0 ? (
+                <li className={styles.loading}>검색 결과가 없습니다.</li>
+              ) : (
                 items.map(({ sickCd, sickNm }, itemIndex) => (
                   <ListItem key={sickCd} id={sickCd} title={sickNm} selected={itemIndex === index} onClick={handleClickItem} />
-                ))}
-              {(items.length === 0 || !input) && <li className={styles.listItem}>검색 결과가 없습니다.</li>}
-              {loading && <li className={styles.loading}>loading...</li>}
+                ))
+              )}
             </ul>
+            {loading && <div className={styles.loading}>loading...</div>}
           </div>
         )}
       </div>

@@ -85,6 +85,7 @@ function useSearch() {
   });
 
   return {
+    triggerInput,
     input,
     index,
     items,
