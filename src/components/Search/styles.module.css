@@ -65,14 +65,7 @@
   max-height: 220px;
   overflow-y: auto;
 }
-
-.listItem {
-  padding: 12px 15px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.loading {
+.nothing {
   text-align: center;
   color: #aaa;
   padding: 10px 15px;

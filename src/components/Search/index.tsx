@@ -1,5 +1,6 @@
 import useSearch from '../../hooks/useSearch';
 import ListItem from '../ListItem';
+import Loading from '../Loading';
 import RecommendItem from '../RecommendItem';
 import styles from './styles.module.css';
 
@@ -49,14 +50,12 @@ function Search() {
             </div>
             <ul>
               {items.length === 0 ? (
-                <li className={styles.loading}>검색 결과가 없습니다.</li>
+                <li className={styles.nothing}>검색 결과가 없습니다.</li>
               ) : (
-                items.map(({ sickCd, sickNm }, itemIndex) => (
-                  <ListItem key={sickCd} id={sickCd} title={sickNm} selected={itemIndex === index} onClick={handleClickItem} />
-                ))
+                items.map(({ sickCd, sickNm }, itemIndex) => <ListItem key={sickCd} title={sickNm} selected={itemIndex === index} onClick={handleClickItem} />)
               )}
             </ul>
-            {loading && <div className={styles.loading}>loading...</div>}
+            {loading && <Loading />}
           </div>
         )}
       </div>
