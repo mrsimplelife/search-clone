@@ -13,24 +13,33 @@ function useQuery<T>(queryKey: any[], queryFn: () => Promise<T>, options: Option
   const key = useMemo(() => JSON.stringify(queryKey), [queryKey]);
   const fn = useRef(queryFn);
   const timer = useRef<NodeJS.Timeout>();
-
-  const updateFn = () => {
-    fn.current = queryFn;
-  };
-  useEffect(updateFn, [queryFn]);
+  const _initialData = useRef(initialData);
+  const _enabled = useRef(enabled);
 
   useEffect(() => {
-    if (!enabled) return;
+    fn.current = queryFn;
+  }, [queryFn]);
+
+  useEffect(() => {
+    _enabled.current = enabled;
+  }, [enabled]);
+
+  useEffect(() => {
+    if (!_enabled.current) {
+      setData(_initialData.current);
+      return;
+    }
     if (cache.has(key)) {
       setData(cache.get(key)!);
       return;
     }
+    setLoading(true);
     timer.current = setTimeout(() => {
-      setLoading(true);
       fn.current()
         .then((data) => {
-          setData(data);
           cache.set(key, data);
+          if (!_enabled.current) return;
+          setData(data);
         })
         .catch((error) => {
           setError(error);
@@ -42,8 +51,9 @@ function useQuery<T>(queryKey: any[], queryFn: () => Promise<T>, options: Option
 
     return () => {
       clearTimeout(timer.current);
+      setLoading(false);
     };
-  }, [cache, debounceDelay, enabled, key]);
+  }, [cache, debounceDelay, key]);
 
   const [data, setData] = useState<T>(initialData);
   const [loading, setLoading] = useState(false);

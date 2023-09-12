@@ -1,31 +1,30 @@
-import { useCallback, useEffect, useState } from 'react';
+import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
-function usePopup(inputRef: React.RefObject<HTMLInputElement>, popupRef: React.RefObject<HTMLDivElement>) {
-  const [show, setShow] = useState(false);
+function usePopup(refs: RefObject<HTMLElement>[]) {
+  const _refs = useRef(refs);
+  const [isShowPopup, setIsShowPopup] = useState(false);
 
-  const handleFocusInput = useCallback(() => {
-    setShow(true);
+  const showPopup = useCallback(() => {
+    setIsShowPopup(true);
   }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const { target } = event;
+    const handleClickOutside = ({ target }: MouseEvent) => {
       if (
-        inputRef.current &&
-        !inputRef.current.contains(target as HTMLInputElement) &&
-        popupRef.current &&
-        !popupRef.current.contains(target as HTMLDivElement)
+        _refs.current.every(({ current }) => {
+          return !current?.contains(target as Node);
+        })
       ) {
-        setShow(false);
+        setIsShowPopup(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [inputRef, popupRef]);
+  }, []);
 
-  return { show, handleFocusInput };
+  return { isShowPopup, showPopup };
 }
 
 export default usePopup;
