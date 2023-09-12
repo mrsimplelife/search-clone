@@ -18,6 +18,7 @@ describe('useSearch', () => {
       { sickCd: 'sickCd2', sickNm: 'keyword2' },
     ]);
     jest.useFakeTimers();
+    localStorage.clear();
   });
 
   afterEach(() => {
@@ -132,6 +133,7 @@ describe('useSearch', () => {
     });
     expect(result.current.recentItems).toEqual([{ id: 1, name: 'sick' }]);
   });
+
   it('입력 후 삭제하면 항목 리스트가 비어야 합니다', async () => {
     const { result } = renderHook(() => useSearch({ getKeywords, search: jest.fn() }), {
       wrapper: ({ children }) => <Provider cache={cache}>{children}</Provider>,
