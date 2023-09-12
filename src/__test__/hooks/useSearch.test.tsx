@@ -26,7 +26,7 @@ describe('useSearch', () => {
   });
 
   it('입력이 변경될 때 API에서 키워드를 가져와야 합니다', async () => {
-    const { result } = renderHook(() => useSearch(), {
+    const { result } = renderHook(() => useSearch({ getKeywords, search: jest.fn() }), {
       wrapper: ({ children }) => <Provider cache={cache}>{children}</Provider>,
     });
     expect(result.current.loading).toBe(false);
@@ -47,7 +47,7 @@ describe('useSearch', () => {
   });
 
   it('입력이 비어 있을 때 API에서 키워드를 가져오지 않아야 합니다', async () => {
-    const { result } = renderHook(() => useSearch(), {
+    const { result } = renderHook(() => useSearch({ getKeywords, search: jest.fn() }), {
       wrapper: ({ children }) => <Provider cache={cache}>{children}</Provider>,
     });
     expect(result.current.loading).toBe(false);
@@ -65,7 +65,7 @@ describe('useSearch', () => {
   });
 
   it('입력 변경을 디바운스 처리해야 합니다', async () => {
-    const { result } = renderHook(() => useSearch(), {
+    const { result } = renderHook(() => useSearch({ getKeywords, search: jest.fn() }), {
       wrapper: ({ children }) => <Provider cache={cache}>{children}</Provider>,
     });
     expect(result.current.loading).toBe(false);
@@ -94,7 +94,7 @@ describe('useSearch', () => {
   });
 
   it('최근 항목을 클릭할 때 입력 및 트리거 입력을 설정해야 합니다', async () => {
-    const { result } = renderHook(() => useSearch(), {
+    const { result } = renderHook(() => useSearch({ getKeywords, search: jest.fn() }), {
       wrapper: ({ children }) => <Provider cache={cache}>{children}</Provider>,
     });
     expect(result.current.input).toBe('');
@@ -107,7 +107,7 @@ describe('useSearch', () => {
   });
 
   it('항목을 클릭할 때 입력 및 트리거 입력을 설정해야 합니다', async () => {
-    const { result } = renderHook(() => useSearch(), {
+    const { result } = renderHook(() => useSearch({ getKeywords, search: jest.fn() }), {
       wrapper: ({ children }) => <Provider cache={cache}>{children}</Provider>,
     });
     expect(result.current.input).toBe('');
@@ -120,7 +120,7 @@ describe('useSearch', () => {
   });
 
   it('양식을 제출할 때 최근 항목을 생성해야 합니다', async () => {
-    const { result } = renderHook(() => useSearch(), {
+    const { result } = renderHook(() => useSearch({ getKeywords, search: jest.fn() }), {
       wrapper: ({ children }) => <Provider cache={cache}>{children}</Provider>,
     });
     expect(result.current.recentItems).toEqual([]);
@@ -133,7 +133,7 @@ describe('useSearch', () => {
     expect(result.current.recentItems).toEqual([{ id: 1, name: 'sick' }]);
   });
   it('입력 후 삭제하면 항목 리스트가 비어야 합니다', async () => {
-    const { result } = renderHook(() => useSearch(), {
+    const { result } = renderHook(() => useSearch({ getKeywords, search: jest.fn() }), {
       wrapper: ({ children }) => <Provider cache={cache}>{children}</Provider>,
     });
     expect(result.current.items).toEqual([]);
