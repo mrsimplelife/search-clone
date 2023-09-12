@@ -4,7 +4,9 @@ import Loading from '../Loading';
 import RecommendItem from '../RecommendItem';
 import styles from './styles.module.css';
 
-function Search() {
+type SearchProps = Parameters<typeof useSearch>[0];
+
+function Search({ getKeywords, search }: SearchProps) {
   const {
     input,
     index,
@@ -21,12 +23,12 @@ function Search() {
     handleSubmit,
     handleKeyDown,
     showPopup,
-  } = useSearch();
+  } = useSearch({ getKeywords, search });
 
   return (
     <div className={styles.searchContainer}>
       <div className={styles.relativeContainer}>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} aria-label="search">
           <input
             className={styles.searchInput}
             ref={inputRef}

@@ -1,12 +1,14 @@
 import { ChangeEvent, FormEvent, useCallback, useRef, useState } from 'react';
-import { getKeywords } from '../services/api';
 import useKeywords from './useKeywords';
 import usePopup from './usePopup';
 import useQuery from './useQuery';
 import useRecentItems from './useRecentItems';
 import useScroll from './useScroll';
+import { Item, Recent } from '../types';
 
-function useSearch() {
+type Props = { getKeywords: (name: string) => Promise<Item[]>; search: (name: string) => Promise<Recent[]> };
+
+function useSearch({ getKeywords, search }: Props) {
   const [input, setInput] = useState('');
   const [triggerInput, setTriggerInput] = useState('');
   const [index, setIndex] = useState(-1);
@@ -36,9 +38,10 @@ function useSearch() {
   const handleSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault();
+      search(input);
       handleCreateRecentItem(input);
     },
-    [input, handleCreateRecentItem]
+    [input, handleCreateRecentItem, search]
   );
 
   const handleClickDelete = useCallback(
