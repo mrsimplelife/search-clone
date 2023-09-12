@@ -11,22 +11,22 @@ function useQuery<T>(queryKey: any[], queryFn: () => Promise<T>, options: Option
   const { cache } = useCache<T>();
   const { initialData, enabled, debounceDelay = 0 } = options;
   const key = useMemo(() => JSON.stringify(queryKey), [queryKey]);
+  const [data, setData] = useState<T>(initialData);
+  const [error, setError] = useState<Error | undefined>();
+  const [loading, setLoading] = useState<boolean>(false);
   const fn = useRef(queryFn);
   const timer = useRef<NodeJS.Timeout>();
-  const _initialData = useRef(initialData);
-  const _enabled = useRef(enabled);
+  const currentKey = useRef<string>(key);
+  const initialDataRef = useRef(initialData);
 
   useEffect(() => {
     fn.current = queryFn;
   }, [queryFn]);
 
   useEffect(() => {
-    _enabled.current = enabled;
-  }, [enabled]);
-
-  useEffect(() => {
-    if (!_enabled.current) {
-      setData(_initialData.current);
+    currentKey.current = key;
+    if (!enabled) {
+      setData(initialDataRef.current);
       return;
     }
     if (cache.has(key)) {
@@ -38,8 +38,9 @@ function useQuery<T>(queryKey: any[], queryFn: () => Promise<T>, options: Option
       fn.current()
         .then((data) => {
           cache.set(key, data);
-          if (!_enabled.current) return;
-          setData(data);
+          if (currentKey.current === key) {
+            setData(data);
+          }
         })
         .catch((error) => {
           setError(error);
@@ -53,13 +54,8 @@ function useQuery<T>(queryKey: any[], queryFn: () => Promise<T>, options: Option
       clearTimeout(timer.current);
       setLoading(false);
     };
-  }, [cache, debounceDelay, key]);
+  }, [cache, debounceDelay, enabled, key]);
 
-  const [data, setData] = useState<T>(initialData);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error>();
-
-  return { data, loading, error };
+  return { data, error, loading };
 }
-
 export default useQuery;

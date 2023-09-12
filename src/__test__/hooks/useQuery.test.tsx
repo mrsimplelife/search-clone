@@ -95,6 +95,7 @@ describe('useQuery', () => {
     });
     expect(result.current.error).toBe(error);
   });
+
   it('queryKey가 바뀌때마다 queryFn을 실행해야 합니다', async () => {
     const { result, rerender } = renderHook(({ queryKey }) => useQuery(queryKey, queryFn, options), {
       wrapper: ({ children }) => <Provider cache={cache}>{children}</Provider>,
@@ -113,5 +114,49 @@ describe('useQuery', () => {
     });
     expect(result.current.data).toBe('data2');
     expect(queryFn).toHaveBeenCalledTimes(2);
+  });
+
+  it('queryKey가 바뀌지 않으면 queryFn을 실행하지 않아야 합니다', async () => {
+    const { result, rerender } = renderHook(({ queryKey }) => useQuery(queryKey, queryFn, options), {
+      wrapper: ({ children }) => <Provider cache={cache}>{children}</Provider>,
+      initialProps: { queryKey },
+    });
+    expect(result.current.data).toBe('initial');
+    await act(async () => {
+      jest.advanceTimersByTime(0);
+    });
+    expect(result.current.data).toBe('data');
+    expect(queryFn).toHaveBeenCalledTimes(1);
+    rerender({ queryKey });
+    await act(async () => {
+      jest.advanceTimersByTime(0);
+    });
+    expect(result.current.data).toBe('data');
+    expect(queryFn).toHaveBeenCalledTimes(1);
+  });
+  it('queryKey가 바뀐 이후에 queryFn이 완료되면 이전 데이터를 반환해야 합니다', async () => {
+    const { result, rerender } = renderHook(({ queryKey }) => useQuery(queryKey, queryFn, options), {
+      wrapper: ({ children }) => <Provider cache={cache}>{children}</Provider>,
+      initialProps: { queryKey },
+    });
+    expect(result.current.data).toBe('initial');
+    await act(async () => {
+      jest.advanceTimersByTime(0);
+    });
+    expect(result.current.data).toBe('data');
+    expect(queryFn).toHaveBeenCalledTimes(1);
+    queryFn.mockResolvedValueOnce(new Promise((resolve) => setTimeout(() => resolve('data2'), 100)));
+    rerender({ queryKey: ['key1', 'key3'] });
+    await act(async () => {
+      jest.advanceTimersByTime(0);
+    });
+    rerender({ queryKey: ['key1', 'key2'] });
+    await act(async () => {
+      jest.advanceTimersByTime(0);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(100);
+    });
+    expect(result.current.data).toBe('data');
   });
 });
